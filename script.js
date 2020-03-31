@@ -2,9 +2,24 @@ onload = function () {
     load();
 };
 
+const WRAPPER_STYLE = {
+    display: 'flex',
+    flexWrap: 'wrap',
+}
+
+const MONITOR_STYLE = {
+    width: '600px',
+    height: '250px',
+    margin: '10px auto',
+    border: '2px solid #111111',
+    backgroundColor: '#dddddd',
+    resize: 'none',
+}
+
 const KEYBOARD_STYLE = {
     display: 'grid',
-    gridTemplate: 'repeat(10, 20px) / repeat(31, 20px)'
+    gridTemplate: 'repeat(10, 20px) / repeat(31, 20px)',
+    margin: '0 auto',
 }
 
 const SPECIAL_BUTTON_STYLE = {
@@ -22,7 +37,6 @@ const BUTTON_STYLE = {
     border: '2px solid #4d4d4d',
     borderRadius: '6px',
     fontSize: '20px',
-
 };
 
 const LINE_1_BUTTONS = {
@@ -85,59 +99,76 @@ const LINE_4_BUTTONS = {
 }
 
 function load() {
-    let div = document.createElement('div');
-    div.className = 'keyboard';
-    for (let styleProperty in KEYBOARD_STYLE) {
-        div.style[styleProperty] = KEYBOARD_STYLE[styleProperty];
+    //Create container
+    let wrapper = document.createElement('div');
+    wrapper.className = 'wrapper';
+    for (let styleProperty in WRAPPER_STYLE) {
+        wrapper.style[styleProperty] = WRAPPER_STYLE[styleProperty];
     }
-    document.body.append(div);
+    document.body.append(wrapper);
+
+    //Create monitor
+    let monitor = document.createElement('textarea');
+    monitor.className = 'monitor';
+    for (let styleProperty in MONITOR_STYLE) {
+        monitor.style[styleProperty] = MONITOR_STYLE[styleProperty];
+    }
+    wrapper.append(monitor);
+
+    //Create keyboard
+    let keyboard = document.createElement('div');
+    keyboard.className = 'keyboard';
+    for (let styleProperty in KEYBOARD_STYLE) {
+        keyboard.style[styleProperty] = KEYBOARD_STYLE[styleProperty];
+    }
+    wrapper.append(keyboard);
     customElements.define('key-button', KeyButton, { extends: 'button' });
     customElements.define('special-key-button', SpecialButton, { extends: 'button' });
 
     //Line buttons 1
-    createKeys(LINE_1_BUTTONS, div);
-    createSpecialKey('Backspace', 'Backspace', div, 5);
+    createKeys(LINE_1_BUTTONS, keyboard);
+    createSpecialKey('Backspace', 'Backspace', keyboard, 5);
     //Line buttons 2
-    createSpecialKey('Tab', 'Tab', div, 3);
-    createKeys(LINE_2_BUTTONS, div);
-    createSpecialKey('Delete', 'Delete', div);
+    createSpecialKey('Tab', 'Tab', keyboard, 3);
+    createKeys(LINE_2_BUTTONS, keyboard);
+    createSpecialKey('Delete', 'Delete', keyboard);
     //Line buttons 3
-    createSpecialKey('CapsLock', 'Caps Lock', div, 4);
-    createKeys(LINE_3_BUTTONS, div);
-    createSpecialKey('Enter', 'Enter', div, 5);
+    createSpecialKey('CapsLock', 'Caps Lock', keyboard, 4);
+    createKeys(LINE_3_BUTTONS, keyboard);
+    createSpecialKey('Enter', 'Enter', keyboard, 5);
     //Line buttons 4
-    createSpecialKey('ShiftLeft', 'Shift', div, 5);
-    createKeys(LINE_4_BUTTONS, div);
-    createSpecialKey('ArrowUp', '^', div);
-    createSpecialKey('ShiftRight', 'Shift', div, 4);
+    createSpecialKey('ShiftLeft', 'Shift', keyboard, 5);
+    createKeys(LINE_4_BUTTONS, keyboard);
+    createSpecialKey('ArrowUp', '^', keyboard);
+    createSpecialKey('ShiftRight', 'Shift', keyboard, 4);
     //Line buttons 5
-    createSpecialKey('ControlLeft', 'Ctrl', div, 3);
-    createSpecialKey('MetaLeft', 'Meta', div);
-    createSpecialKey('AltLeft', 'Alt', div);
-    createSpecialKey('Space', ' ', div, 11);
-    createSpecialKey('AltRight', 'Alt', div);
-    createSpecialKey('ControlRight', 'Ctrl', div, 3);
-    createSpecialKey('ArrowLeft', '<', div);
-    createSpecialKey('ArrowDown', 'v', div);
-    createSpecialKey('ArrowRight', '>', div);
+    createSpecialKey('ControlLeft', 'Ctrl', keyboard, 3);
+    createSpecialKey('MetaLeft', 'Meta', keyboard);
+    createSpecialKey('AltLeft', 'Alt', keyboard);
+    createSpecialKey('Space', ' ', keyboard, 11);
+    createSpecialKey('AltRight', 'Alt', keyboard);
+    createSpecialKey('ControlRight', 'Ctrl', keyboard, 3);
+    createSpecialKey('ArrowLeft', '<', keyboard);
+    createSpecialKey('ArrowDown', 'v', keyboard);
+    createSpecialKey('ArrowRight', '>', keyboard);
 }
 
 //Function creates key-buttons from object and appends to page.
-function createKeys(keys, div) {
+function createKeys(keys, domElement) {
     for (let key in keys) {
         let keyButton = getKey(key, keys[key]);
-        div.append(keyButton);
+        domElement.append(keyButton);
     }
 }
 
 //Function creates a functional key-button and appends to page.
-function createSpecialKey(key, text, div, length) {
+function createSpecialKey(key, text, domElement, length) {
     let keyButton = document.createElement('button', 'special-key-button');
     keyButton.id = key;
     keyButton.innerText = text;
     keyButton.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
     // debugger;    
-    div.append(keyButton);
+    domElement.append(keyButton);
 }
 
 //Function returns the key-button.
@@ -148,6 +179,8 @@ function getKey(id, text, length) {
     key.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
     return key;
 }
+
+
 
 //The class represents key-button.
 class KeyButton extends HTMLButtonElement {
