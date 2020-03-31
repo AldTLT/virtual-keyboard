@@ -2,6 +2,10 @@ onload = function () {
     load();
 };
 
+const ACTIVE_BUTTON_STYLE = {
+    backgroundColor: '#999999',
+}
+
 const WRAPPER_STYLE = {
     display: 'flex',
     flexWrap: 'wrap',
@@ -99,6 +103,17 @@ const LINE_4_BUTTONS = {
 }
 
 function load() {
+    //Create style (not used)
+    let activeButtonStyle = document.createElement('style');
+    activeButtonStyle.type = 'text/css';
+    let innerHtml = '.active-button {'
+    for (let styleProperty in ACTIVE_BUTTON_STYLE) {
+        innerHtml += `${styleProperty}: ${ACTIVE_BUTTON_STYLE[styleProperty]}`;
+    }
+    innerHtml += '}';
+    activeButtonStyle.innerHTML = innerHtml;
+    document.querySelector('head').appendChild(activeButtonStyle);
+
     //Create container
     let wrapper = document.createElement('div');
     wrapper.className = 'wrapper';
@@ -151,6 +166,11 @@ function load() {
     createSpecialKey('ArrowLeft', '<', keyboard);
     createSpecialKey('ArrowDown', 'v', keyboard);
     createSpecialKey('ArrowRight', '>', keyboard);
+
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
 }
 
 //Function creates key-buttons from object and appends to page.
@@ -180,17 +200,69 @@ function getKey(id, text, length) {
     return key;
 }
 
+//Event mouse button down
+function onMouseDown(event) {
+    let target = event.target;
+    if (target.classList.contains('button')) {
+        keyButtonPressed(target);
+    }
+}
 
+//Event mouse button up
+function onMouseUp(event) {
+    let keyButton = event.target;
+    keyButtonReleased(keyButton);
+}
+
+//Event key button down
+function onKeyDown(event) {
+    let keyButton = document.querySelector(`#${event.code}`);
+    
+    if (!keyButton) {
+        return;
+    }
+
+    if (keyButton.classList.contains('button')) {
+        keyButtonPressed(keyButton);
+    }
+}
+
+//Event key button down
+function onKeyUp(event) {
+    let keyButton = document.querySelector(`#${event.code}`);
+
+    if (!keyButton) {
+        return;
+    }
+
+    if (keyButton.classList.contains('button')) {
+        keyButtonReleased(keyButton);
+    }
+}
+
+//The function applies the style to the pressed key-button
+function keyButtonPressed(keyButton) {
+    keyButton.style.backgroundColor = '#999999';
+}
+
+//The function applies the style to the released key-button
+function keyButtonReleased(keyButton) {
+    if (keyButton.classList.contains('button')) {
+        keyButton.style.backgroundColor = BUTTON_STYLE.backgroundColor;
+    }
+    if (keyButton.classList.contains('special-button')) {
+        keyButton.style.backgroundColor = SPECIAL_BUTTON_STYLE.backgroundColor;
+    }
+}
 
 //The class represents key-button.
 class KeyButton extends HTMLButtonElement {
-    constructor(width) {
+    constructor() {
         super();
         for (let styleProperty in BUTTON_STYLE) {
-            // debugger;
             this.style[styleProperty] = this.style[styleProperty] == '' ? BUTTON_STYLE[styleProperty] : this.style[styleProperty];
         }
-        this.className = 'button';
+        this.classList.add('button');
     }
 }
 
@@ -201,7 +273,7 @@ class SpecialButton extends KeyButton {
         for (let styleProperty in SPECIAL_BUTTON_STYLE) {
             this.style[styleProperty] = SPECIAL_BUTTON_STYLE[styleProperty];
         }
-        this.className = 'special-button';
+        this.classList.add('special-button');
     }
 }
 
