@@ -26,6 +26,10 @@ const KEYBOARD_STYLE = {
     margin: '0 auto',
 }
 
+const SYMBOL_BUTTON_STYLE = {
+
+}
+
 const SPECIAL_BUTTON_STYLE = {
     backgroundColor: '#dfc9bd',
     border: '2px solid #234567',
@@ -102,8 +106,10 @@ const LINE_4_BUTTONS = {
     Slash: '/'
 }
 
+let textCursorPosition = 0;
+
 function load() {
-    //Create style (not used)
+    //Create style (not allowed)
     let activeButtonStyle = document.createElement('style');
     activeButtonStyle.type = 'text/css';
     let innerHtml = '.active-button {'
@@ -114,7 +120,7 @@ function load() {
     activeButtonStyle.innerHTML = innerHtml;
     document.querySelector('head').appendChild(activeButtonStyle);
 
-    //Create container
+    //Create wrapper
     let wrapper = document.createElement('div');
     wrapper.className = 'wrapper';
     for (let styleProperty in WRAPPER_STYLE) {
@@ -137,7 +143,7 @@ function load() {
         keyboard.style[styleProperty] = KEYBOARD_STYLE[styleProperty];
     }
     wrapper.append(keyboard);
-    customElements.define('key-button', KeyButton, { extends: 'button' });
+    customElements.define('symbol-key-button', SymbolButton, { extends: 'button' });
     customElements.define('special-key-button', SpecialButton, { extends: 'button' });
 
     //Line buttons 1
@@ -160,17 +166,20 @@ function load() {
     createSpecialKey('ControlLeft', 'Ctrl', keyboard, 3);
     createSpecialKey('MetaLeft', 'Meta', keyboard);
     createSpecialKey('AltLeft', 'Alt', keyboard);
-    createSpecialKey('Space', ' ', keyboard, 11);
+    keyboard.append(getKey('Space', ' ', 11));
     createSpecialKey('AltRight', 'Alt', keyboard);
     createSpecialKey('ControlRight', 'Ctrl', keyboard, 3);
     createSpecialKey('ArrowLeft', '<', keyboard);
     createSpecialKey('ArrowDown', 'v', keyboard);
     createSpecialKey('ArrowRight', '>', keyboard);
 
+    //Events
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
+    document.addEventListener('mouseout', onMouseOut);
+    document.addEventListener('click', onClick);
 }
 
 //Function creates key-buttons from object and appends to page.
@@ -193,7 +202,7 @@ function createSpecialKey(key, text, domElement, length) {
 
 //Function returns the key-button.
 function getKey(id, text, length) {
-    let key = document.createElement('button', 'key-button');
+    let key = document.createElement('button', 'symbol-key-button');
     key.id = id;
     key.innerText = text;
     key.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
@@ -205,25 +214,41 @@ function onMouseDown(event) {
     let target = event.target;
     if (target.classList.contains('button')) {
         keyButtonPressed(target);
+    //     let newEvent = new KeyboardEvent('keydown', {code: target.id, key: target.innerText });
+    //    let monitor = document.querySelector('.monitor');
+    //     monitor.dispatchEvent(newEvent);
+        printSymbol(target);
     }
 }
 
 //Event mouse button up
 function onMouseUp(event) {
+    let monitor = document.querySelector('.monitor');
     let keyButton = event.target;
     keyButtonReleased(keyButton);
+    monitor.focus();
+}
+
+//Event mouse click (not allowed)
+function onClick(event) {
+    let target = event.target;
+    if (target.classList.contains('button')) {
+        
+    }
 }
 
 //Event key button down
 function onKeyDown(event) {
+    console.log(event);
     let keyButton = document.querySelector(`#${event.code}`);
-    
+
     if (!keyButton) {
         return;
     }
 
     if (keyButton.classList.contains('button')) {
         keyButtonPressed(keyButton);
+        // printSymbol(keyButton);
     }
 }
 
@@ -240,6 +265,11 @@ function onKeyUp(event) {
     }
 }
 
+//Event mouse leave a target
+function onMouseOut(event) {
+    keyButtonReleased(event.target);
+}
+
 //The function applies the style to the pressed key-button
 function keyButtonPressed(keyButton) {
     keyButton.style.backgroundColor = '#999999';
@@ -247,12 +277,32 @@ function keyButtonPressed(keyButton) {
 
 //The function applies the style to the released key-button
 function keyButtonReleased(keyButton) {
-    if (keyButton.classList.contains('button')) {
+    if (keyButton.classList.contains('symbol-button')) {
         keyButton.style.backgroundColor = BUTTON_STYLE.backgroundColor;
     }
     if (keyButton.classList.contains('special-button')) {
         keyButton.style.backgroundColor = SPECIAL_BUTTON_STYLE.backgroundColor;
     }
+}
+
+//Function adds symbol to textarea
+function printSymbol(keyButton) {    
+    let monitor = document.querySelector('.monitor');
+    let text = monitor.value;
+    let textCursorPosition = monitor.selectionStart;
+
+    if (keyButton.classList.contains('symbol-button')) {
+        monitor.value = addSymbol(keyButton.textContent, text);
+    }
+
+    if (keyButton.classList.contains('special-button')) {
+        console.log(keyButton.id);
+    }
+}
+
+//Function adds symbol to text
+function addSymbol(symbol, text) {
+    return text += symbol;
 }
 
 //The class represents key-button.
@@ -277,6 +327,13 @@ class SpecialButton extends KeyButton {
     }
 }
 
+//The class represents alpha-numeric key-button.
 class SymbolButton extends KeyButton {
-
+    constructor() {
+        super();
+        for (let styleProperty in SYMBOL_BUTTON_STYLE) {
+            this.style[styleProperty] = SYMBOL_BUTTON_STYLE[styleProperty];
+        }
+        this.classList.add('symbol-button');
+    }
 }
