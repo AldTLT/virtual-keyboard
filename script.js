@@ -214,10 +214,18 @@ function onMouseDown(event) {
     let target = event.target;
     if (target.classList.contains('button')) {
         keyButtonPressed(target);
-    //     let newEvent = new KeyboardEvent('keydown', {code: target.id, key: target.innerText });
-    //    let monitor = document.querySelector('.monitor');
-    //     monitor.dispatchEvent(newEvent);
-        printSymbol(target);
+        //     let newEvent = new KeyboardEvent('keydown', {code: target.id, key: target.innerText });
+        //    let monitor = document.querySelector('.monitor');
+        //     monitor.dispatchEvent(newEvent);
+        let monitor = document.querySelector('.monitor');
+
+        if (target.classList.contains('symbol-button')) {
+            printSymbol(target, monitor);
+        }
+        
+        if (target.classList.contains('special-button')) {
+            getSpecialButtonFunction(target, monitor);
+        }
     }
 }
 
@@ -233,13 +241,12 @@ function onMouseUp(event) {
 function onClick(event) {
     let target = event.target;
     if (target.classList.contains('button')) {
-        
+
     }
 }
 
 //Event key button down
 function onKeyDown(event) {
-    console.log(event);
     let keyButton = document.querySelector(`#${event.code}`);
 
     if (!keyButton) {
@@ -286,18 +293,78 @@ function keyButtonReleased(keyButton) {
 }
 
 //Function adds symbol to textarea
-function printSymbol(keyButton) {    
-    let monitor = document.querySelector('.monitor');
+function printSymbol(keyButton, monitor) {    
     let text = monitor.value;
     let textCursorPosition = monitor.selectionStart;
 
-    if (keyButton.classList.contains('symbol-button')) {
-        monitor.value = addSymbol(keyButton.textContent, text);
+    monitor.value = addSymbol(keyButton.textContent, text);
+}
+
+//Function implements special key buttons click
+function getSpecialButtonFunction(keyButton, monitor) {
+    let keyId = keyButton.id;
+    let text = monitor.value.split('');
+    let textCursorPosition = monitor.selectionStart;
+
+    switch(keyId) {
+        case 'Backspace': {
+            text.splice(textCursorPosition - 1, 1);
+            break;
+        }
+        case 'Delete': {
+            text.splice(textCursorPosition, 1);
+            break;
+        }
+        case 'Tab': {
+            text.splice(textCursorPosition, 0, '\t');
+            break;
+        }
+        case 'Enter': {
+            text.splice(textCursorPosition, 0, '\n');
+            break;
+        }
+        case 'CapsLock': {
+            break;
+        }
+        case 'ShiftLeft': {
+            break;
+        }
+        case 'ShiftRight': {
+            break;
+        }
+        case 'ControlLeft': {
+            break;
+        }
+        case 'ControlRight': {
+            break;
+        }
+        case 'MetaLeft': {
+            break;
+        }
+        case 'AltLeft': {
+            break;
+        }
+        case 'AltRight': {
+            break;
+        }
+        case 'ArrowUp': {
+            break;
+        }
+        case 'ArrowLeft': {
+            break;
+        }
+        case 'ArrowDown': {
+            break;
+        }
+        case 'ArrowRight': {
+            break;
+        }
+        default: {
+            break;
+        }
     }
 
-    if (keyButton.classList.contains('special-button')) {
-        console.log(keyButton.id);
-    }
+    monitor.value = text.join('');
 }
 
 //Function adds symbol to text
