@@ -1,6 +1,13 @@
+// import {KeyButton, SpecialButton, SymbolButton} from `./classbutton.js`;
+
 onload = function () {
     load();
 };
+
+let shiftPressed = false;
+let controlPressed = false;
+let altPressed = false;
+let keysPressed = [];
 
 const ACTIVE_BUTTON_STYLE = {
     backgroundColor: '#999999',
@@ -109,6 +116,11 @@ const LINE_4_BUTTONS = {
 let textCursorPosition = 0;
 
 function load() {
+    //Set localstorage
+    if (localStorage.capsLock === undefined) {
+        localStorage.setItem('capsLock', 0);
+    }
+
     //Create style (not allowed)
     let activeButtonStyle = document.createElement('style');
     activeButtonStyle.type = 'text/css';
@@ -222,9 +234,10 @@ function onMouseDown(event) {
         if (target.classList.contains('symbol-button')) {
             printSymbol(target, monitor);
         }
-        
+
         if (target.classList.contains('special-button')) {
             getSpecialButtonFunction(target, monitor);
+            console.log(shiftPressed);
         }
     }
 }
@@ -234,6 +247,8 @@ function onMouseUp(event) {
     let monitor = document.querySelector('.monitor');
     let keyButton = event.target;
     keyButtonReleased(keyButton);
+    specialKeyButtonUp(keyButton);
+    console.log(shiftPressed);
     monitor.focus();
 }
 
@@ -292,21 +307,28 @@ function keyButtonReleased(keyButton) {
     }
 }
 
-//Function adds symbol to textarea
-function printSymbol(keyButton, monitor) {    
-    let text = monitor.value;
-    let textCursorPosition = monitor.selectionStart;
-
-    monitor.value = addSymbol(keyButton.textContent, text);
+//The function registers pressed key buttons
+function getPressedKeyButtons(keyButton) {
+    keysPressed.push(keyButton.id);
 }
 
-//Function implements special key buttons click
+//The function adds symbol to textarea
+function printSymbol(keyButton, monitor) {
+    let text = monitor.value;
+    let textCursorPosition = monitor.selectionStart;
+    let symbol = localStorage.getItem('capsLock') == 'false' ?
+        keyButton.textContent.toLowerCase()
+        : keyButton.textContent.toUpperCase();
+    monitor.value = addSymbol(symbol, text);
+}
+
+//The function implements special key buttons click
 function getSpecialButtonFunction(keyButton, monitor) {
     let keyId = keyButton.id;
     let text = monitor.value.split('');
     let textCursorPosition = monitor.selectionStart;
 
-    switch(keyId) {
+    switch (keyId) {
         case 'Backspace': {
             text.splice(textCursorPosition - 1, 1);
             break;
@@ -324,27 +346,35 @@ function getSpecialButtonFunction(keyButton, monitor) {
             break;
         }
         case 'CapsLock': {
+            let capsLock = localStorage.getItem('capsLock')
+            localStorage.setItem('capsLock', invert(capsLock));
             break;
         }
         case 'ShiftLeft': {
+            shiftPressed = true;
             break;
         }
         case 'ShiftRight': {
+            shiftPressed = true;
             break;
         }
         case 'ControlLeft': {
+            controlPressed = true;
             break;
         }
         case 'ControlRight': {
+            controlPressed = true;
             break;
         }
         case 'MetaLeft': {
             break;
         }
         case 'AltLeft': {
+            altPressed = true;
             break;
         }
         case 'AltRight': {
+            altPressed = true;
             break;
         }
         case 'ArrowUp': {
@@ -367,7 +397,47 @@ function getSpecialButtonFunction(keyButton, monitor) {
     monitor.value = text.join('');
 }
 
-//Function adds symbol to text
+//Unpress special key buttons
+function specialKeyButtonUp(keyButton) {
+    let keyId = keyButton.id;
+
+    switch (keyId) {
+        case 'ShiftLeft': {
+            shiftPressed = false;
+            break;
+        }
+        case 'ShiftRight': {
+            shiftPressed = false;
+            break;
+        }
+        case 'ControlLeft': {
+            controlPressed = false;
+            break;
+        }
+        case 'ControlRight': {
+            controlPressed = false;
+            break;
+        }
+        case 'AltLeft': {
+            altPressed = false;
+            break;
+        }
+        case 'AltRight': {
+            altPressed = false;
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+//The function invert bool
+function invert(data) {
+    return data == 'false' ? 'true' : 'false';
+}
+
+//The function adds symbol to text
 function addSymbol(symbol, text) {
     return text += symbol;
 }
