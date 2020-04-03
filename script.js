@@ -56,121 +56,62 @@ const BUTTON_STYLE = {
 };
 
 const LINE_1_BUTTONS = {
-    Backquote: '`',
-    Digit1: '1',
-    Digit2: '2',
-    Digit3: '3',
-    Digit4: '4',
-    Digit5: '5',
-    Digit6: '6',
-    Digit7: '7',
-    Digit8: '8',
-    Digit9: '9',
-    Digit0: '0',
-    Minus: '-',
-    Equal: '+'
-}
-
-const LINE_1_BUTTONS_RU = {
-    Backquote: 'Ё',
-    Digit1: '1',
-    Digit2: '2',
-    Digit3: '3',
-    Digit4: '4',
-    Digit5: '5',
-    Digit6: '6',
-    Digit7: '7',
-    Digit8: '8',
-    Digit9: '9',
-    Digit0: '0',
-    Minus: '-',
-    Equal: '+'
+    Backquote: ['`', 'Ё'],
+    Digit1: ['1', '1'],
+    Digit2: ['2', '2'],
+    Digit3: ['3', '3'],
+    Digit4: ['4', '4'],
+    Digit5: ['5', '5'],
+    Digit6: ['6', '6'],
+    Digit7: ['7', '7'],
+    Digit8: ['8', '8'],
+    Digit9: ['9', '9'],
+    Digit0: ['0', '0'],
+    Minus: ['-', '-'],
+    Equal: ['+', '+'],
 }
 
 const LINE_2_BUTTONS = {
-    KeyQ: 'Q',
-    KeyW: 'W',
-    KeyE: 'E',
-    KeyR: 'R',
-    KeyT: 'T',
-    KeyY: 'Y',
-    KeyU: 'U',
-    KeyI: 'I',
-    KeyO: 'O',
-    KeyP: 'P',
-    BracketLeft: '[',
-    BracketRight: ']',
-    Backslash: '\\'
-}
-
-const LINE_2_BUTTONS_RU = {
-    KeyQ: 'Й',
-    KeyW: 'Ц',
-    KeyE: 'У',
-    KeyR: 'К',
-    KeyT: 'Е',
-    KeyY: 'Н',
-    KeyU: 'Г',
-    KeyI: 'Ш',
-    KeyO: 'Щ',
-    KeyP: 'З',
-    BracketLeft: 'Х',
-    BracketRight: 'Ъ',
-    Backslash: '\\'
+    KeyQ: ['Q', 'Й'],
+    KeyW: ['W', 'Ц'],
+    KeyE: ['E', 'У'],
+    KeyR: ['R', 'К'],
+    KeyT: ['T', 'Е'],
+    KeyY: ['Y', 'Н'],
+    KeyU: ['U', 'Г'],
+    KeyI: ['I', 'Ш'],
+    KeyO: ['O', 'Щ'],
+    KeyP: ['P', 'З'],
+    BracketLeft: ['[', 'Х'],
+    BracketRight: [']', 'Ъ'],
+    Backslash: ['\\', '\\'],
 }
 
 const LINE_3_BUTTONS = {
-    KeyA: 'A',
-    KeyS: 'S',
-    KeyD: 'D',
-    KeyF: 'F',
-    KeyG: 'G',
-    KeyH: 'H',
-    KeyJ: 'J',
-    KeyK: 'K',
-    KeyL: 'L',
-    Semicolon: ';',
-    Quote: '\''
-}
-
-const LINE_3_BUTTONS_RU = {
-    KeyA: 'Ф',
-    KeyS: 'Ы',
-    KeyD: 'В',
-    KeyF: 'А',
-    KeyG: 'П',
-    KeyH: 'Р',
-    KeyJ: 'О',
-    KeyK: 'Л',
-    KeyL: 'Д',
-    Semicolon: 'Ж',
-    Quote: 'Э'
+    KeyA: ['A', 'Ф'],
+    KeyS: ['S', 'Ы'],
+    KeyD: ['D', 'В'],
+    KeyF: ['F', 'А'],
+    KeyG: ['G', 'П'],
+    KeyH: ['H', 'Р'],
+    KeyJ: ['J', 'О'],
+    KeyK: ['K', 'Л'],
+    KeyL: ['L', 'Д'],
+    Semicolon: [';', 'Ж'],
+    Quote: ['\'', 'Э'],
 }
 
 const LINE_4_BUTTONS = {
-    KeyZ: 'Z',
-    KeyX: 'X',
-    KeyC: 'C',
-    KeyV: 'V',
-    KeyB: 'B',
-    KeyN: 'N',
-    KeyM: 'M',
-    Comma: ',',
-    Period: '.',
-    Slash: '/'
-}
-
-const LINE_4_BUTTONS_RU = {
-    KeyZ: 'Я',
-    KeyX: 'Ч',
-    KeyC: 'С',
-    KeyV: 'М',
-    KeyB: 'И',
-    KeyN: 'Т',
-    KeyM: 'Ь',
-    Comma: 'Б',
-    Period: 'Ю',
-    Slash: '.'
+    KeyZ: ['Z', 'Я'],
+    KeyX: ['X', 'Ч'],
+    KeyC: ['C', 'С'],
+    KeyV: ['V', 'М'],
+    KeyB: ['B', 'И'],
+    KeyN: ['N', 'Т'],
+    KeyM: ['M', 'Ь'],
+    Comma: [',', 'Б'],
+    Period: ['.', 'Ю'],
+    Slash: ['/', '.'],
 }
 
 let textCursorPosition = 0;
@@ -218,45 +159,27 @@ function load() {
     customElements.define('symbol-key-button', SymbolButton, { extends: 'button' });
     customElements.define('special-key-button', SpecialButton, { extends: 'button' });
 
-    //Define language
-    let lineButtons1;
-    let lineButtons2;
-    let lineButtons3;
-    let lineButtons4;
-    localStorage.getItem('language') == 'en' ? (
-        lineButtons1 = LINE_1_BUTTONS,
-        lineButtons2 = LINE_2_BUTTONS,
-        lineButtons3 = LINE_3_BUTTONS,
-        lineButtons4 = LINE_4_BUTTONS
-        )
-        : (
-            lineButtons1 = LINE_1_BUTTONS_RU,
-            lineButtons2 = LINE_2_BUTTONS_RU,
-            lineButtons3 = LINE_3_BUTTONS_RU,
-            lineButtons4 = LINE_4_BUTTONS_RU 
-        );
-
     //Line buttons 1
-    createKeys(lineButtons1, keyboard);
+    createKeys(LINE_1_BUTTONS, keyboard);
     createSpecialKey('Backspace', 'Backspace', keyboard, 5);
     //Line buttons 2
     createSpecialKey('Tab', 'Tab', keyboard, 3);
-    createKeys(lineButtons2, keyboard);
+    createKeys(LINE_2_BUTTONS, keyboard);
     createSpecialKey('Delete', 'Delete', keyboard);
     //Line buttons 3
     createSpecialKey('CapsLock', 'Caps Lock', keyboard, 4);
-    createKeys(lineButtons3, keyboard);
+    createKeys(LINE_3_BUTTONS, keyboard);
     createSpecialKey('Enter', 'Enter', keyboard, 5);
     //Line buttons 4
     createSpecialKey('ShiftLeft', 'Shift', keyboard, 5);
-    createKeys(lineButtons4, keyboard);
+    createKeys(LINE_4_BUTTONS, keyboard);
     createSpecialKey('ArrowUp', '^', keyboard);
     createSpecialKey('ShiftRight', 'Shift', keyboard, 4);
     //Line buttons 5
     createSpecialKey('ControlLeft', 'Ctrl', keyboard, 3);
     createSpecialKey('MetaLeft', 'Meta', keyboard);
     createSpecialKey('AltLeft', 'Alt', keyboard);
-    keyboard.append(getKey('Space', ' ', 11));
+    keyboard.append(getKey('Space', [' ', ' '], 11));
     createSpecialKey('AltRight', 'Alt', keyboard);
     createSpecialKey('ControlRight', 'Ctrl', keyboard, 3);
     createSpecialKey('ArrowLeft', '<', keyboard);
@@ -291,12 +214,23 @@ function createSpecialKey(key, text, domElement, length) {
 }
 
 //Function returns the key-button.
-function getKey(id, text, length) {
-    let key = document.createElement('button', 'symbol-key-button');
-    key.id = id;
-    key.innerText = text;
-    key.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
-    return key;
+function getKey(id, keyText, length) {
+    let text;
+    let value;
+    localStorage.getItem('language') == 'en' ? (
+        text = keyText[0],
+        value = keyText[1])
+        : (
+            text = keyText[1],
+            value = keyText[0]
+        );
+
+    let keyButton = document.createElement('button', 'symbol-key-button');
+    keyButton.id = id;
+    keyButton.innerText = text;
+    keyButton.value = value;
+    keyButton.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
+    return keyButton;
 }
 
 //Event mouse button down
@@ -304,9 +238,6 @@ function onMouseDown(event) {
     let target = event.target;
     if (target.classList.contains('button')) {
         keyButtonPressed(target);
-        //     let newEvent = new KeyboardEvent('keydown', {code: target.id, key: target.innerText });
-        //    let monitor = document.querySelector('.monitor');
-        //     monitor.dispatchEvent(newEvent);
         let monitor = document.querySelector('.monitor');
 
         if (target.classList.contains('symbol-button')) {
@@ -315,7 +246,6 @@ function onMouseDown(event) {
 
         if (target.classList.contains('special-button')) {
             getSpecialButtonFunction(target, monitor);
-            console.log(shiftPressed);
         }
     }
 }
@@ -326,7 +256,6 @@ function onMouseUp(event) {
     let keyButton = event.target;
     keyButtonReleased(keyButton);
     specialKeyButtonUp(keyButton);
-    console.log(shiftPressed);
     monitor.focus();
 }
 
@@ -372,11 +301,21 @@ function onMouseOut(event) {
 
 //The function applies the style to the pressed key-button
 function keyButtonPressed(keyButton) {
+    //Save key to array
+    if (!keysPressed.includes(keyButton.id)) {
+        keysPressed.push(keyButton.id);
+    }
     keyButton.style.backgroundColor = '#999999';
+    makeKeysCombination();
 }
 
 //The function applies the style to the released key-button
 function keyButtonReleased(keyButton) {
+    //Delete key button from array
+    if (keysPressed.includes(keyButton.id)) {
+        keysPressed = keysPressed.filter(keyId => keyId != keyButton.id);
+    }
+
     if (keyButton.classList.contains('symbol-button')) {
         keyButton.style.backgroundColor = BUTTON_STYLE.backgroundColor;
     }
@@ -512,6 +451,29 @@ function specialKeyButtonUp(keyButton) {
 //The function adds symbol to text
 function addSymbol(symbol, text) {
     return text += symbol;
+}
+
+function changeLanguage() {
+    let keyButtons = document.querySelectorAll('.symbol-button');
+    keyButtons.forEach(keyButton => {
+        let text = keyButton.innerText;
+        keyButton.innerText = keyButton.value;
+        keyButton.value = text;
+    })
+
+}
+
+function makeKeysCombination() {
+    if (keysPressed.length == 2) {
+        // debugger;
+        if (keysPressed.includes('ShiftLeft') || keysPressed.includes('ShiftLeft')) {
+            if (keysPressed.includes('ControlLeft') || keysPressed.includes('ControlRight')) {
+                let language = localStorage.getItem('language') == 'en' ? 'ru' : 'en';
+                localStorage.setItem('language', language);
+                changeLanguage(language);
+            }
+        }
+    }
 }
 
 //The class represents key-button.
