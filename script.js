@@ -277,7 +277,6 @@ function onKeyDown(event) {
 
     if (keyButton.classList.contains('button')) {
         keyButtonPressed(keyButton);
-        // printSymbol(keyButton);
     }
 }
 
@@ -305,8 +304,9 @@ function keyButtonPressed(keyButton) {
     if (!keysPressed.includes(keyButton.id)) {
         keysPressed.push(keyButton.id);
     }
-    keyButton.style.backgroundColor = '#999999';
     makeKeysCombination();
+    keyButton.style.backgroundColor = '#999999';
+
 }
 
 //The function applies the style to the released key-button
@@ -333,10 +333,7 @@ function getPressedKeyButtons(keyButton) {
 function printSymbol(keyButton, monitor) {
     let text = monitor.value;
     let textCursorPosition = monitor.selectionStart;
-    let symbol = capsLock ?
-        keyButton.textContent.toLowerCase()
-        : keyButton.textContent.toUpperCase();
-    monitor.value = addSymbol(symbol, text);
+    monitor.value = addSymbol(keyButton.textContent, text);
 }
 
 //The function implements special key buttons click
@@ -364,6 +361,7 @@ function getSpecialButtonFunction(keyButton, monitor) {
         }
         case 'CapsLock': {
             capsLock = !capsLock;
+            capsLockChange();
             break;
         }
         case 'ShiftLeft': {
@@ -411,6 +409,21 @@ function getSpecialButtonFunction(keyButton, monitor) {
     }
 
     monitor.value = text.join('');
+}
+
+//Function change symbol register to upper or to lower case according caps lock button
+function capsLockChange() {
+    let keyButtons = document.querySelectorAll('.symbol-button');
+    keyButtons.forEach(keyButton => {
+        if (capsLock) {
+            keyButton.innerText = keyButton.innerText.toUpperCase();
+            keyButton.value = keyButton.value.toUpperCase();
+        } 
+        else {
+            keyButton.innerText = keyButton.innerText.toLowerCase();
+            keyButton.value = keyButton.value.toLowerCase();
+        }
+    });
 }
 
 //Unpress special key buttons
@@ -466,7 +479,7 @@ function changeLanguage() {
 function makeKeysCombination() {
     if (keysPressed.length == 2) {
         // debugger;
-        if (keysPressed.includes('ShiftLeft') || keysPressed.includes('ShiftLeft')) {
+        if (keysPressed.includes('ShiftLeft') || keysPressed.includes('ShiftRight')) {
             if (keysPressed.includes('ControlLeft') || keysPressed.includes('ControlRight')) {
                 let language = localStorage.getItem('language') == 'en' ? 'ru' : 'en';
                 localStorage.setItem('language', language);
