@@ -4,6 +4,7 @@ onload = function () {
     load();
 };
 
+let capsLock = false;
 let shiftPressed = false;
 let controlPressed = false;
 let altPressed = false;
@@ -70,6 +71,22 @@ const LINE_1_BUTTONS = {
     Equal: '+'
 }
 
+const LINE_1_BUTTONS_RU = {
+    Backquote: 'Ё',
+    Digit1: '1',
+    Digit2: '2',
+    Digit3: '3',
+    Digit4: '4',
+    Digit5: '5',
+    Digit6: '6',
+    Digit7: '7',
+    Digit8: '8',
+    Digit9: '9',
+    Digit0: '0',
+    Minus: '-',
+    Equal: '+'
+}
+
 const LINE_2_BUTTONS = {
     KeyQ: 'Q',
     KeyW: 'W',
@@ -83,6 +100,22 @@ const LINE_2_BUTTONS = {
     KeyP: 'P',
     BracketLeft: '[',
     BracketRight: ']',
+    Backslash: '\\'
+}
+
+const LINE_2_BUTTONS_RU = {
+    KeyQ: 'Й',
+    KeyW: 'Ц',
+    KeyE: 'У',
+    KeyR: 'К',
+    KeyT: 'Е',
+    KeyY: 'Н',
+    KeyU: 'Г',
+    KeyI: 'Ш',
+    KeyO: 'Щ',
+    KeyP: 'З',
+    BracketLeft: 'Х',
+    BracketRight: 'Ъ',
     Backslash: '\\'
 }
 
@@ -100,6 +133,20 @@ const LINE_3_BUTTONS = {
     Quote: '\''
 }
 
+const LINE_3_BUTTONS_RU = {
+    KeyA: 'Ф',
+    KeyS: 'Ы',
+    KeyD: 'В',
+    KeyF: 'А',
+    KeyG: 'П',
+    KeyH: 'Р',
+    KeyJ: 'О',
+    KeyK: 'Л',
+    KeyL: 'Д',
+    Semicolon: 'Ж',
+    Quote: 'Э'
+}
+
 const LINE_4_BUTTONS = {
     KeyZ: 'Z',
     KeyX: 'X',
@@ -113,12 +160,25 @@ const LINE_4_BUTTONS = {
     Slash: '/'
 }
 
+const LINE_4_BUTTONS_RU = {
+    KeyZ: 'Я',
+    KeyX: 'Ч',
+    KeyC: 'С',
+    KeyV: 'М',
+    KeyB: 'И',
+    KeyN: 'Т',
+    KeyM: 'Ь',
+    Comma: 'Б',
+    Period: 'Ю',
+    Slash: '.'
+}
+
 let textCursorPosition = 0;
 
 function load() {
     //Set localstorage
-    if (localStorage.capsLock === undefined) {
-        localStorage.setItem('capsLock', 0);
+    if (localStorage.language === undefined) {
+        localStorage.setItem('language', 'en');
     }
 
     //Create style (not allowed)
@@ -158,20 +218,38 @@ function load() {
     customElements.define('symbol-key-button', SymbolButton, { extends: 'button' });
     customElements.define('special-key-button', SpecialButton, { extends: 'button' });
 
+    //Define language
+    let lineButtons1;
+    let lineButtons2;
+    let lineButtons3;
+    let lineButtons4;
+    localStorage.getItem('language') == 'en' ? (
+        lineButtons1 = LINE_1_BUTTONS,
+        lineButtons2 = LINE_2_BUTTONS,
+        lineButtons3 = LINE_3_BUTTONS,
+        lineButtons4 = LINE_4_BUTTONS
+        )
+        : (
+            lineButtons1 = LINE_1_BUTTONS_RU,
+            lineButtons2 = LINE_2_BUTTONS_RU,
+            lineButtons3 = LINE_3_BUTTONS_RU,
+            lineButtons4 = LINE_4_BUTTONS_RU 
+        );
+
     //Line buttons 1
-    createKeys(LINE_1_BUTTONS, keyboard);
+    createKeys(lineButtons1, keyboard);
     createSpecialKey('Backspace', 'Backspace', keyboard, 5);
     //Line buttons 2
     createSpecialKey('Tab', 'Tab', keyboard, 3);
-    createKeys(LINE_2_BUTTONS, keyboard);
+    createKeys(lineButtons2, keyboard);
     createSpecialKey('Delete', 'Delete', keyboard);
     //Line buttons 3
     createSpecialKey('CapsLock', 'Caps Lock', keyboard, 4);
-    createKeys(LINE_3_BUTTONS, keyboard);
+    createKeys(lineButtons3, keyboard);
     createSpecialKey('Enter', 'Enter', keyboard, 5);
     //Line buttons 4
     createSpecialKey('ShiftLeft', 'Shift', keyboard, 5);
-    createKeys(LINE_4_BUTTONS, keyboard);
+    createKeys(lineButtons4, keyboard);
     createSpecialKey('ArrowUp', '^', keyboard);
     createSpecialKey('ShiftRight', 'Shift', keyboard, 4);
     //Line buttons 5
@@ -316,7 +394,7 @@ function getPressedKeyButtons(keyButton) {
 function printSymbol(keyButton, monitor) {
     let text = monitor.value;
     let textCursorPosition = monitor.selectionStart;
-    let symbol = localStorage.getItem('capsLock') == 'false' ?
+    let symbol = capsLock ?
         keyButton.textContent.toLowerCase()
         : keyButton.textContent.toUpperCase();
     monitor.value = addSymbol(symbol, text);
@@ -346,8 +424,7 @@ function getSpecialButtonFunction(keyButton, monitor) {
             break;
         }
         case 'CapsLock': {
-            let capsLock = localStorage.getItem('capsLock')
-            localStorage.setItem('capsLock', invert(capsLock));
+            capsLock = !capsLock;
             break;
         }
         case 'ShiftLeft': {
@@ -430,11 +507,6 @@ function specialKeyButtonUp(keyButton) {
             break;
         }
     }
-}
-
-//The function invert bool
-function invert(data) {
-    return data == 'false' ? 'true' : 'false';
 }
 
 //The function adds symbol to text
