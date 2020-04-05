@@ -1,5 +1,3 @@
-// import {KeyButton, SpecialButton, SymbolButton} from `./classbutton.js`;
-
 onload = function () {
     load();
 };
@@ -8,7 +6,11 @@ let capsLock = false;
 let shiftPressed = false;
 let controlPressed = false;
 let altPressed = false;
+let languageChanged = false;
+let selectorPosition = 0;
 let keysPressed = [];
+
+const keyRelisedStyleTransform = 'scale(1)';
 
 const ACTIVE_BUTTON_STYLE = {
     backgroundColor: '#999999',
@@ -16,6 +18,7 @@ const ACTIVE_BUTTON_STYLE = {
 
 const WRAPPER_STYLE = {
     display: 'flex',
+    width: '700px',
     flexWrap: 'wrap',
 }
 
@@ -53,6 +56,7 @@ const BUTTON_STYLE = {
     border: '2px solid #4d4d4d',
     borderRadius: '6px',
     fontSize: '20px',
+    transition: '0.1s',
 };
 
 const LINE_1_BUTTONS = {
@@ -227,8 +231,8 @@ function getKey(id, keyText, length) {
 
     let keyButton = document.createElement('button', 'symbol-key-button');
     keyButton.id = id;
-    keyButton.innerText = text;
-    keyButton.value = value;
+    keyButton.innerText = text.toLowerCase();
+    keyButton.value = value.toLowerCase();
     keyButton.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
     return keyButton;
 }
@@ -239,15 +243,14 @@ function onMouseDown(event) {
     if (target.classList.contains('button')) {
         keyButtonPressed(target);
         let monitor = document.querySelector('.monitor');
-
         if (target.classList.contains('symbol-button')) {
             printSymbol(target, monitor);
         }
 
         if (target.classList.contains('special-button')) {
             getSpecialButtonFunction(target, monitor);
-        }
-    }
+        }        
+    }    
 }
 
 //Event mouse button up
@@ -306,7 +309,11 @@ function keyButtonPressed(keyButton) {
     }
     makeKeysCombination();
     keyButton.style.backgroundColor = '#999999';
-
+    //Compute scaleX to transform key button
+    let width = window.getComputedStyle(keyButton).width;
+    width = width.substring(0, width.length - 2) ;
+    let scaleX = 1 - (4 / width).toFixed(3);
+    keyButton.style.transform = `scale(${scaleX}, 0.9)`;
 }
 
 //The function applies the style to the released key-button
@@ -322,6 +329,10 @@ function keyButtonReleased(keyButton) {
     if (keyButton.classList.contains('special-button')) {
         keyButton.style.backgroundColor = SPECIAL_BUTTON_STYLE.backgroundColor;
     }
+
+    saveSelectorPosition();
+    keyButton.style.transform = keyRelisedStyleTransform;
+    languageChanged = false;
 }
 
 //The function registers pressed key buttons
@@ -331,9 +342,10 @@ function getPressedKeyButtons(keyButton) {
 
 //The function adds symbol to textarea
 function printSymbol(keyButton, monitor) {
+    saveSelectorPosition()
     let text = monitor.value;
-    let textCursorPosition = monitor.selectionStart;
-    monitor.value = addSymbol(keyButton.textContent, text);
+    monitor.value = text.substring(0, selectorPosition) + keyButton.textContent + text.substring(selectorPosition);
+    monitor.selectionStart = monitor.selectionEnd = selectorPosition + 1;
 }
 
 //The function implements special key buttons click
@@ -341,22 +353,27 @@ function getSpecialButtonFunction(keyButton, monitor) {
     let keyId = keyButton.id;
     let text = monitor.value.split('');
     let textCursorPosition = monitor.selectionStart;
+    console.log(monitor.selectionStart);
+    saveSelectorPosition();
 
     switch (keyId) {
-        case 'Backspace': {
+        case 'Backspace': {            
             text.splice(textCursorPosition - 1, 1);
+            selectorPosition = (selectorPosition - 1) < 0 ? 0 : selectorPosition - 1;
             break;
         }
-        case 'Delete': {
+        case 'Delete': {            
             text.splice(textCursorPosition, 1);
             break;
         }
         case 'Tab': {
             text.splice(textCursorPosition, 0, '\t');
+            selectorPosition += 1;
             break;
         }
         case 'Enter': {
             text.splice(textCursorPosition, 0, '\n');
+            selectorPosition += 1;
             break;
         }
         case 'CapsLock': {
@@ -409,6 +426,7 @@ function getSpecialButtonFunction(keyButton, monitor) {
     }
 
     monitor.value = text.join('');
+    monitor.selectionStart = monitor.selectionEnd = selectorPosition;
 }
 
 //Function change symbol register to upper or to lower case according caps lock button
@@ -461,11 +479,7 @@ function specialKeyButtonUp(keyButton) {
     }
 }
 
-//The function adds symbol to text
-function addSymbol(symbol, text) {
-    return text += symbol;
-}
-
+//Function changes the language
 function changeLanguage() {
     let keyButtons = document.querySelectorAll('.symbol-button');
     keyButtons.forEach(keyButton => {
@@ -476,17 +490,27 @@ function changeLanguage() {
 
 }
 
+//Functions handels key combination
 function makeKeysCombination() {
     if (keysPressed.length == 2) {
-        // debugger;
+        if (languageChanged) {
+            return;
+        }
+
         if (keysPressed.includes('ShiftLeft') || keysPressed.includes('ShiftRight')) {
             if (keysPressed.includes('ControlLeft') || keysPressed.includes('ControlRight')) {
+                languageChanged = true;
                 let language = localStorage.getItem('language') == 'en' ? 'ru' : 'en';
                 localStorage.setItem('language', language);
                 changeLanguage(language);
             }
         }
     }
+}
+
+//Function saved start selection of the textarea
+function saveSelectorPosition() {
+    selectorPosition = document.querySelector('.monitor').selectionStart;
 }
 
 //The class represents key-button.
