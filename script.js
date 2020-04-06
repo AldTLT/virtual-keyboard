@@ -118,6 +118,13 @@ const LINE_4_BUTTONS = {
     Slash: ['/', '.'],
 }
 
+const INFO_STYLE = {
+    margin: '0 50px',
+}
+
+const OS_INFO_TEXT = 'Клавиатура создавалась для ОС Windows.';
+const LANGUAGE_CHANGE_INFO_TEXT = 'Для смены языка нажмите Ctrl+Shift. Используйме мышь и клавиатуру в любой комбинации.'
+
 let textCursorPosition = 0;
 
 function load() {
@@ -145,6 +152,28 @@ function load() {
     }
     document.body.append(wrapper);
 
+    //Create div info
+    let osInfoDiv = document.createElement('div');
+    wrapper.append(osInfoDiv);
+
+    //Create os info
+    let osInfoP = document.createElement('p');
+    osInfoP.className = 'information';
+    osInfoP.innerText = OS_INFO_TEXT;
+    for (let styleProperty in INFO_STYLE) {
+        osInfoP.style[styleProperty] = INFO_STYLE[styleProperty];
+    }
+    osInfoDiv.append(osInfoP);
+
+    //Create language change info
+    let languageInfoP = document.createElement('p');
+    languageInfoP.className = 'information';
+    languageInfoP.innerText = LANGUAGE_CHANGE_INFO_TEXT;
+    for (let styleProperty in INFO_STYLE) {
+        languageInfoP.style[styleProperty] = INFO_STYLE[styleProperty];
+    }
+    osInfoDiv.append(languageInfoP);
+
     //Create monitor
     let monitor = document.createElement('textarea');
     monitor.className = 'monitor';
@@ -169,7 +198,7 @@ function load() {
     //Line buttons 2
     createSpecialKey('Tab', 'Tab', keyboard, 3);
     createKeys(LINE_2_BUTTONS, keyboard);
-    createSpecialKey('Delete', 'Delete', keyboard);
+    createSpecialKey('Delete', 'Del', keyboard);
     //Line buttons 3
     createSpecialKey('CapsLock', 'Caps Lock', keyboard, 4);
     createKeys(LINE_3_BUTTONS, keyboard);
@@ -196,7 +225,6 @@ function load() {
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
     document.addEventListener('mouseout', onMouseOut);
-    document.addEventListener('click', onClick);
 }
 
 //Function creates key-buttons from object and appends to page.
@@ -241,7 +269,6 @@ function getKey(id, keyText, length) {
 function onMouseDown(event) {
     let target = event.target;
     if (target.classList.contains('button')) {
-        keyButtonPressed(target);
         let monitor = document.querySelector('.monitor');
         if (target.classList.contains('symbol-button')) {
             printSymbol(target, monitor);
@@ -249,8 +276,9 @@ function onMouseDown(event) {
 
         if (target.classList.contains('special-button')) {
             getSpecialButtonFunction(target, monitor);
-        }        
-    }    
+        }
+        keyButtonPressed(target);
+    }
 }
 
 //Event mouse button up
@@ -260,14 +288,6 @@ function onMouseUp(event) {
     keyButtonReleased(keyButton);
     specialKeyButtonUp(keyButton);
     monitor.focus();
-}
-
-//Event mouse click (not allowed)
-function onClick(event) {
-    let target = event.target;
-    if (target.classList.contains('button')) {
-
-    }
 }
 
 //Event key button down
@@ -307,11 +327,13 @@ function keyButtonPressed(keyButton) {
     if (!keysPressed.includes(keyButton.id)) {
         keysPressed.push(keyButton.id);
     }
-    makeKeysCombination();
     keyButton.style.backgroundColor = '#999999';
+
+    makeKeysCombination();
+
     //Compute scaleX to transform key button
     let width = window.getComputedStyle(keyButton).width;
-    width = width.substring(0, width.length - 2) ;
+    width = width.substring(0, width.length - 2);
     let scaleX = 1 - (4 / width).toFixed(3);
     keyButton.style.transform = `scale(${scaleX}, 0.9)`;
 }
@@ -353,16 +375,15 @@ function getSpecialButtonFunction(keyButton, monitor) {
     let keyId = keyButton.id;
     let text = monitor.value.split('');
     let textCursorPosition = monitor.selectionStart;
-    console.log(monitor.selectionStart);
     saveSelectorPosition();
 
     switch (keyId) {
-        case 'Backspace': {            
+        case 'Backspace': {
             text.splice(textCursorPosition - 1, 1);
             selectorPosition = (selectorPosition - 1) < 0 ? 0 : selectorPosition - 1;
             break;
         }
-        case 'Delete': {            
+        case 'Delete': {
             text.splice(textCursorPosition, 1);
             break;
         }
@@ -378,7 +399,7 @@ function getSpecialButtonFunction(keyButton, monitor) {
         }
         case 'CapsLock': {
             capsLock = !capsLock;
-            capsLockChange();
+            toUpperOrLowerCase(capsLock);
             break;
         }
         case 'ShiftLeft': {
@@ -409,15 +430,21 @@ function getSpecialButtonFunction(keyButton, monitor) {
             break;
         }
         case 'ArrowUp': {
+            setArrowUpPosition();
             break;
         }
         case 'ArrowLeft': {
+            monitor.selectionStart = selectorPosition > 0 ? selectorPosition - 1 : 0;
+            saveSelectorPosition();
             break;
         }
         case 'ArrowDown': {
+            setArrowDownPosition();
             break;
         }
         case 'ArrowRight': {
+            monitor.selectionStart = selectorPosition < monitor.textLength ? selectorPosition + 1 : selectorPosition;
+            saveSelectorPosition();
             break;
         }
         default: {
@@ -429,14 +456,50 @@ function getSpecialButtonFunction(keyButton, monitor) {
     monitor.selectionStart = monitor.selectionEnd = selectorPosition;
 }
 
-//Function change symbol register to upper or to lower case according caps lock button
-function capsLockChange() {
+//The function moves cursor position up
+function setArrowUpPosition() {
+    let monitor = document.querySelector('.monitor');
+    let text = monitor.value;
+    let cursorPosition = 0;
+    text = text.substring(0, selectorPosition).split('\n');
+    let row = text.length;
+    if (text.length > 1) {
+        let shift = text[text.length - 1].length;
+        text.pop();
+        text[text.length - 1] = text[text.length - 1].substr(0, shift);
+
+        cursorPosition = text.join('\n').length;
+    }
+    else {
+        cursorPosition = monitor.selectionStart;
+    }
+    monitor.selectionStart = monitor.selectionEnd = cursorPosition;
+    saveSelectorPosition();
+}
+
+//The function moves cursor position down
+function setArrowDownPosition() {
+    let monitor = document.querySelector('.monitor');
+    let text = monitor.value;
+    let arrowTextAfter = text.substring(selectorPosition).split('\n');
+    let shiftAfter = arrowTextAfter[0].length;
+    let arrowTextBefore = text.substring(0, selectorPosition).split('\n');
+    let shiftBefore = arrowTextBefore[arrowTextBefore.length - 1].length;
+    shiftBefore = arrowTextAfter.length > 1 ? Math.min(shiftBefore, arrowTextAfter[1].length) : 0;
+
+    monitor.selectionStart = monitor.selectionEnd = monitor.selectionStart + shiftBefore + shiftAfter + 1;
+    saveSelectorPosition();
+}
+
+
+//The function converts characters to upper or lower case
+function toUpperOrLowerCase(toUpper) {
     let keyButtons = document.querySelectorAll('.symbol-button');
     keyButtons.forEach(keyButton => {
-        if (capsLock) {
+        if (toUpper) {
             keyButton.innerText = keyButton.innerText.toUpperCase();
             keyButton.value = keyButton.value.toUpperCase();
-        } 
+        }
         else {
             keyButton.innerText = keyButton.innerText.toLowerCase();
             keyButton.value = keyButton.value.toLowerCase();
@@ -477,6 +540,10 @@ function specialKeyButtonUp(keyButton) {
             break;
         }
     }
+
+    if (!shiftPressed) {
+        toUpperOrLowerCase(capsLock);
+    }
 }
 
 //Function changes the language
@@ -492,6 +559,7 @@ function changeLanguage() {
 
 //Functions handels key combination
 function makeKeysCombination() {
+
     if (keysPressed.length == 2) {
         if (languageChanged) {
             return;
@@ -503,6 +571,9 @@ function makeKeysCombination() {
                 let language = localStorage.getItem('language') == 'en' ? 'ru' : 'en';
                 localStorage.setItem('language', language);
                 changeLanguage(language);
+            }
+            else {
+                toUpperOrLowerCase(!capsLock);
             }
         }
     }
