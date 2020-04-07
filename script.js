@@ -16,6 +16,7 @@ const WRAPPER_STYLE = {
   display: 'flex',
   width: '700px',
   flexWrap: 'wrap',
+  margin: '0 auto',
 };
 
 const MONITOR_STYLE = {
@@ -52,6 +53,7 @@ const BUTTON_STYLE = {
   border: '2px solid #4d4d4d',
   borderRadius: '6px',
   fontSize: '20px',
+  fontWeight: '600',
   transition: '0.1s',
 };
 
@@ -116,12 +118,14 @@ const LINE_4_BUTTONS = {
 
 const INFO_STYLE = {
   margin: '0 50px',
+  fontSize: '20px',
+  color: '#264458',
 };
 
 const OS_INFO_TEXT = 'Клавиатура создавалась для ОС Windows.';
-const LANGUAGE_CHANGE_INFO_TEXT = 'Для смены языка нажмите Ctrl+Shift. Используйме мышь и клавиатуру в любой комбинации.';
+const LANGUAGE_CHANGE_INFO_TEXT = 'Для смены языка нажмите Ctrl+Shift. Используйте мышь и клавиатуру в любой комбинации.';
 
-onload = function() {
+onload = function () {
   // Set localstorage
   if (localStorage.language === undefined) {
     localStorage.setItem('language', 'en');
@@ -200,7 +204,7 @@ onload = function() {
   // Line buttons 4
   createSpecialKey('ShiftLeft', 'Shift', keyboard, 5);
   createKeys(LINE_4_BUTTONS, keyboard);
-  createSpecialKey('ArrowUp', '^', keyboard);
+  createSpecialKey('ArrowUp', '🡅', keyboard);
   createSpecialKey('ShiftRight', 'Shift', keyboard, 4);
   // Line buttons 5
   createSpecialKey('ControlLeft', 'Ctrl', keyboard, 3);
@@ -209,9 +213,9 @@ onload = function() {
   keyboard.append(getKey('Space', [' ', ' '], 11));
   createSpecialKey('AltRight', 'Alt', keyboard);
   createSpecialKey('ControlRight', 'Ctrl', keyboard, 3);
-  createSpecialKey('ArrowLeft', '<', keyboard);
-  createSpecialKey('ArrowDown', 'v', keyboard);
-  createSpecialKey('ArrowRight', '>', keyboard);
+  createSpecialKey('ArrowLeft', '🡄', keyboard);
+  createSpecialKey('ArrowDown', '🡇', keyboard);
+  createSpecialKey('ArrowRight', '🡆', keyboard);
 
   // Events
   document.addEventListener('mousedown', onMouseDown);
@@ -287,12 +291,28 @@ function onMouseUp(event) {
 // Event key button down
 function onKeyDown(event) {
   const keyButton = document.querySelector(`#${event.code}`);
+  const monitor = document.querySelector('.monitor');
 
   if (!keyButton) {
     return;
   }
 
   if (keyButton.classList.contains('button')) {
+    if (keyButton.classList.contains('symbol-button')) {
+      event.preventDefault();
+      printSymbol(keyButton, monitor);
+    }
+
+    if (keyButton.id == 'ShiftLeft' || keyButton.id == 'ShiftRight') {
+      event.preventDefault();
+      toUpperOrLowerCase(!capsLock);
+    }
+
+    if (keyButton.id == 'Tab') {
+      event.preventDefault();
+      getSpecialButtonFunction(keyButton, monitor);
+    }
+
     keyButtonPressed(keyButton);
   }
 }
@@ -306,6 +326,11 @@ function onKeyUp(event) {
   }
 
   if (keyButton.classList.contains('button')) {
+    if (keyButton.id == 'ShiftLeft' || keyButton.id == 'ShiftRight') {
+      event.preventDefault();
+      toUpperOrLowerCase(capsLock);
+    }
+
     keyButtonReleased(keyButton);
   }
 }
@@ -317,11 +342,14 @@ function onMouseOut(event) {
 
 // The function applies the style to the pressed key-button
 function keyButtonPressed(keyButton) {
-  // Save key to array
-  if (!keysPressed.includes(keyButton.id)) {
-    keysPressed.push(keyButton.id);
-  }
   keyButton.style.backgroundColor = '#999999';
+
+  if (keyButton.classList.contains('special-button')) {
+    // Save key to array
+    if (!keysPressed.includes(keyButton.id)) {
+      keysPressed.push(keyButton.id);
+    }
+  }
 
   makeKeysCombination();
 
@@ -334,15 +362,16 @@ function keyButtonPressed(keyButton) {
 
 // The function applies the style to the released key-button
 function keyButtonReleased(keyButton) {
-  // Delete key button from array
-  if (keysPressed.includes(keyButton.id)) {
-    keysPressed = keysPressed.filter((keyId) => keyId != keyButton.id);
-  }
 
   if (keyButton.classList.contains('symbol-button')) {
     keyButton.style.backgroundColor = BUTTON_STYLE.backgroundColor;
   }
   if (keyButton.classList.contains('special-button')) {
+    // Delete key button from array
+    if (keysPressed.includes(keyButton.id)) {
+      keysPressed = keysPressed.filter((keyId) => keyId != keyButton.id);
+    }
+
     keyButton.style.backgroundColor = SPECIAL_BUTTON_STYLE.backgroundColor;
   }
 
@@ -358,9 +387,10 @@ function getPressedKeyButtons(keyButton) {
 
 // The function adds symbol to textarea
 function printSymbol(keyButton, monitor) {
+  let symbol = keyButton.id == 'Space' ? keyButton.value : keyButton.textContent;
   saveSelectorPosition();
   const text = monitor.value;
-  monitor.value = text.substring(0, selectorPosition) + keyButton.textContent + text.substring(selectorPosition);
+  monitor.value = text.substring(0, selectorPosition) + symbol + text.substring(selectorPosition);
   monitor.selectionStart = monitor.selectionEnd = selectorPosition + 1;
 }
 
@@ -393,14 +423,17 @@ function getSpecialButtonFunction(keyButton, monitor) {
     }
     case 'CapsLock': {
       capsLock = !capsLock;
+      keyButton.style.border = capsLock ? '2px solid #32d432' : '2px solid #234567';
       toUpperOrLowerCase(capsLock);
       break;
     }
     case 'ShiftLeft': {
+        toUpperOrLowerCase(!capsLock);
       shiftPressed = true;
       break;
     }
     case 'ShiftRight': {
+      toUpperOrLowerCase(!capsLock);
       shiftPressed = true;
       break;
     }
@@ -509,10 +542,12 @@ function specialKeyButtonUp(keyButton) {
       break;
     }
     case 'ShiftRight': {
+      toUpperOrLowerCase(capsLock);
       shiftPressed = false;
       break;
     }
     case 'ControlLeft': {
+      toUpperOrLowerCase(capsLock);
       controlPressed = false;
       break;
     }
