@@ -34,16 +34,11 @@ const KEYBOARD_STYLE = {
   margin: '0 auto',
 };
 
-const SYMBOL_BUTTON_STYLE = {
-
-};
-
 const SPECIAL_BUTTON_STYLE = {
   backgroundColor: '#dfc9bd',
   border: '2px solid #234567',
   borderRadius: '6px',
   fontSize: '12px',
-
 };
 
 const BUTTON_STYLE = {
@@ -127,20 +122,20 @@ const LANGUAGE_CHANGE_INFO_TEXT = 'Для смены языка нажмите C
 
 onload = function () {
   // Set localstorage
-  if (localStorage.language === undefined) {
+  if (!localStorage.language) {
     localStorage.setItem('language', 'en');
   }
 
-  // Create style (not allowed)
-  const activeButtonStyle = document.createElement('style');
-  activeButtonStyle.type = 'text/css';
-  let innerHtml = '.active-button {';
-  for (const styleProperty in ACTIVE_BUTTON_STYLE) {
-    innerHtml += `${styleProperty}: ${ACTIVE_BUTTON_STYLE[styleProperty]}`;
-  }
-  innerHtml += '}';
-  activeButtonStyle.innerHTML = innerHtml;
-  document.querySelector('head').appendChild(activeButtonStyle);
+  // // Create style (not allowed)
+  // const activeButtonStyle = document.createElement('style');
+  // activeButtonStyle.type = 'text/css';
+  // let innerHtml = '.active-button {';
+  // for (const styleProperty in ACTIVE_BUTTON_STYLE) {
+  //   innerHtml += `${styleProperty}: ${ACTIVE_BUTTON_STYLE[styleProperty]}`;
+  // }
+  // innerHtml += '}';
+  // activeButtonStyle.innerHTML = innerHtml;
+  // document.querySelector('head').appendChild(activeButtonStyle);
 
   // Create wrapper
   const wrapper = document.createElement('div');
@@ -238,7 +233,7 @@ function createSpecialKey(key, text, domElement, length) {
   const keyButton = document.createElement('button', 'special-key-button');
   keyButton.id = key;
   keyButton.innerText = text;
-  keyButton.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
+  keyButton.style.gridColumn = length ? `span ${length}` : 'span 2';
   // debugger;
   domElement.append(keyButton);
 }
@@ -247,19 +242,19 @@ function createSpecialKey(key, text, domElement, length) {
 function getKey(id, keyText, length) {
   let text;
   let value;
-  localStorage.getItem('language') == 'en' ? (
-    text = keyText[0],
-    value = keyText[1])
-    : (
-      text = keyText[1],
-      value = keyText[0]
-    );
+  if (localStorage.getItem('language') === 'en') {
+    text = keyText[0];
+    value = keyText[1];
+  } else {
+    text = keyText[1];
+    value = keyText[0];
+  };
 
   const keyButton = document.createElement('button', 'symbol-key-button');
   keyButton.id = id;
   keyButton.innerText = text.toLowerCase();
   keyButton.value = value.toLowerCase();
-  keyButton.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
+  keyButton.style.gridColumn = length ? `span ${length}` : 'span 2';
   return keyButton;
 }
 
@@ -303,12 +298,12 @@ function onKeyDown(event) {
       printSymbol(keyButton, monitor);
     }
 
-    if (keyButton.id == 'ShiftLeft' || keyButton.id == 'ShiftRight') {
+    if (keyButton.id === 'ShiftLeft' || keyButton.id === 'ShiftRight') {
       event.preventDefault();
       toUpperOrLowerCase(!capsLock);
     }
 
-    if (keyButton.id == 'Tab') {
+    if (keyButton.id === 'Tab') {
       event.preventDefault();
       getSpecialButtonFunction(keyButton, monitor);
     }
@@ -326,7 +321,7 @@ function onKeyUp(event) {
   }
 
   if (keyButton.classList.contains('button')) {
-    if (keyButton.id == 'ShiftLeft' || keyButton.id == 'ShiftRight') {
+    if (keyButton.id === 'ShiftLeft' || keyButton.id === 'ShiftRight') {
       event.preventDefault();
       toUpperOrLowerCase(capsLock);
     }
@@ -387,7 +382,7 @@ function getPressedKeyButtons(keyButton) {
 
 // The function adds symbol to textarea
 function printSymbol(keyButton, monitor) {
-  let symbol = keyButton.id == 'Space' ? keyButton.value : keyButton.textContent;
+  let symbol = keyButton.id === 'Space' ? keyButton.value : keyButton.textContent;
   saveSelectorPosition();
   const text = monitor.value;
   monitor.value = text.substring(0, selectorPosition) + symbol + text.substring(selectorPosition);
@@ -428,7 +423,7 @@ function getSpecialButtonFunction(keyButton, monitor) {
       break;
     }
     case 'ShiftLeft': {
-        toUpperOrLowerCase(!capsLock);
+      toUpperOrLowerCase(!capsLock);
       shiftPressed = true;
       break;
     }
@@ -443,9 +438,6 @@ function getSpecialButtonFunction(keyButton, monitor) {
     }
     case 'ControlRight': {
       controlPressed = true;
-      break;
-    }
-    case 'MetaLeft': {
       break;
     }
     case 'AltLeft': {
@@ -585,7 +577,7 @@ function changeLanguage() {
 
 // Functions handels key combination
 function makeKeysCombination() {
-  if (keysPressed.length == 2) {
+  if (keysPressed.length === 2) {
     if (languageChanged) {
       return;
     }
@@ -593,9 +585,9 @@ function makeKeysCombination() {
     if (keysPressed.includes('ShiftLeft') || keysPressed.includes('ShiftRight')) {
       if (keysPressed.includes('ControlLeft') || keysPressed.includes('ControlRight')) {
         languageChanged = true;
-        const language = localStorage.getItem('language') == 'en' ? 'ru' : 'en';
+        const language = localStorage.getItem('language') === 'en' ? 'ru' : 'en';
         localStorage.setItem('language', language);
-        changeLanguage(language);
+        changeLanguage();
       } else {
         toUpperOrLowerCase(!capsLock);
       }
@@ -613,7 +605,7 @@ class KeyButton extends HTMLButtonElement {
   constructor() {
     super();
     for (const styleProperty in BUTTON_STYLE) {
-      this.style[styleProperty] = this.style[styleProperty] == '' ? BUTTON_STYLE[styleProperty] : this.style[styleProperty];
+      this.style[styleProperty] = this.style[styleProperty] === '' ? BUTTON_STYLE[styleProperty] : this.style[styleProperty];
     }
     this.classList.add('button');
   }
