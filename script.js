@@ -126,24 +126,10 @@ onload = function () {
     localStorage.setItem('language', 'en');
   }
 
-  // // Create style (not allowed)
-  // const activeButtonStyle = document.createElement('style');
-  // activeButtonStyle.type = 'text/css';
-  // let innerHtml = '.active-button {';
-  // for (const styleProperty in ACTIVE_BUTTON_STYLE) {
-  //   innerHtml += `${styleProperty}: ${ACTIVE_BUTTON_STYLE[styleProperty]}`;
-  // }
-  // innerHtml += '}';
-  // activeButtonStyle.innerHTML = innerHtml;
-  // document.querySelector('head').appendChild(activeButtonStyle);
-
   // Create wrapper
   const wrapper = document.createElement('div');
   wrapper.className = 'wrapper';
-  for (const styleProperty in WRAPPER_STYLE) {
-    wrapper.style[styleProperty] = WRAPPER_STYLE[styleProperty];
-  }
-  document.body.append(wrapper);
+  Object.assign(wrapper.style, WRAPPER_STYLE);
 
   // Create div info
   const osInfoDiv = document.createElement('div');
@@ -153,35 +139,31 @@ onload = function () {
   const osInfoP = document.createElement('p');
   osInfoP.className = 'information';
   osInfoP.innerText = OS_INFO_TEXT;
-  for (const styleProperty in INFO_STYLE) {
-    osInfoP.style[styleProperty] = INFO_STYLE[styleProperty];
-  }
+  Object.assign(osInfoP.style, INFO_STYLE);
   osInfoDiv.append(osInfoP);
 
   // Create language change info
   const languageInfoP = document.createElement('p');
   languageInfoP.className = 'information';
   languageInfoP.innerText = LANGUAGE_CHANGE_INFO_TEXT;
-  for (const styleProperty in INFO_STYLE) {
-    languageInfoP.style[styleProperty] = INFO_STYLE[styleProperty];
-  }
+  Object.assign(languageInfoP.style, INFO_STYLE);
   osInfoDiv.append(languageInfoP);
 
   // Create monitor
   const monitor = document.createElement('textarea');
   monitor.className = 'monitor';
-  for (const styleProperty in MONITOR_STYLE) {
-    monitor.style[styleProperty] = MONITOR_STYLE[styleProperty];
-  }
+  Object.assign(monitor.style, MONITOR_STYLE);
   wrapper.append(monitor);
 
   // Create keyboard
   const keyboard = document.createElement('div');
   keyboard.className = 'keyboard';
-  for (const styleProperty in KEYBOARD_STYLE) {
-    keyboard.style[styleProperty] = KEYBOARD_STYLE[styleProperty];
-  }
+  Object.assign(keyboard.style, KEYBOARD_STYLE);
   wrapper.append(keyboard);
+
+  // Append wrapper
+  document.body.append(wrapper);
+
   customElements.define('symbol-key-button', SymbolButton, { extends: 'button' });
   customElements.define('special-key-button', SpecialButton, { extends: 'button' });
 
@@ -212,6 +194,7 @@ onload = function () {
   createSpecialKey('ArrowDown', '🡇', keyboard);
   createSpecialKey('ArrowRight', '🡆', keyboard);
 
+  document.querySelector('#Space').style.gridColumn = 'span 11';
   // Events
   document.addEventListener('mousedown', onMouseDown);
   document.addEventListener('mouseup', onMouseUp);
@@ -223,7 +206,7 @@ onload = function () {
 // Function creates key-buttons from object and appends to page.
 function createKeys(keys, domElement) {
   for (const key in keys) {
-    const keyButton = getKey(key, keys[key]);
+    const keyButton = getKey(key, keys[key], domElement);
     domElement.append(keyButton);
   }
 }
@@ -231,11 +214,10 @@ function createKeys(keys, domElement) {
 // Function creates a functional key-button and appends to page.
 function createSpecialKey(key, text, domElement, length) {
   const keyButton = document.createElement('button', 'special-key-button');
+  domElement.append(keyButton);
   keyButton.id = key;
   keyButton.innerText = text;
-  keyButton.style.gridColumn = length ? `span ${length}` : 'span 2';
-  // debugger;
-  domElement.append(keyButton);
+  keyButton.style.gridColumn = length !== undefined ? `span ${length}` : 'span 2';
 }
 
 // Function returns the key-button.
@@ -357,7 +339,6 @@ function keyButtonPressed(keyButton) {
 
 // The function applies the style to the released key-button
 function keyButtonReleased(keyButton) {
-
   if (keyButton.classList.contains('symbol-button')) {
     keyButton.style.backgroundColor = BUTTON_STYLE.backgroundColor;
   }
@@ -382,7 +363,7 @@ function getPressedKeyButtons(keyButton) {
 
 // The function adds symbol to textarea
 function printSymbol(keyButton, monitor) {
-  let symbol = keyButton.id === 'Space' ? keyButton.value : keyButton.textContent;
+  let symbol = keyButton.id === 'Space' ? ' ' : keyButton.innerText;
   saveSelectorPosition();
   const text = monitor.value;
   monitor.value = text.substring(0, selectorPosition) + symbol + text.substring(selectorPosition);
@@ -512,14 +493,11 @@ function setArrowDownPosition() {
 
 // The function converts characters to upper or lower case
 function toUpperOrLowerCase(toUpper) {
-  const keyButtons = document.querySelectorAll('.symbol-button');
-  keyButtons.forEach((keyButton) => {
+  document.querySelectorAll('.symbol-button').forEach((button) => {
     if (toUpper) {
-      keyButton.innerText = keyButton.innerText.toUpperCase();
-      keyButton.value = keyButton.value.toUpperCase();
+      button.style.textTransform = 'uppercase';
     } else {
-      keyButton.innerText = keyButton.innerText.toLowerCase();
-      keyButton.value = keyButton.value.toLowerCase();
+      button.style.textTransform = 'lowercase';
     }
   });
 }
@@ -604,9 +582,10 @@ function saveSelectorPosition() {
 class KeyButton extends HTMLButtonElement {
   constructor() {
     super();
-    for (const styleProperty in BUTTON_STYLE) {
-      this.style[styleProperty] = this.style[styleProperty] === '' ? BUTTON_STYLE[styleProperty] : this.style[styleProperty];
-    }
+    // for (const styleProperty in BUTTON_STYLE) {
+    //   this.style[styleProperty] = this.style[styleProperty] === '' ? BUTTON_STYLE[styleProperty] : this.style[styleProperty];
+    // }
+    Object.assign(this.style, BUTTON_STYLE);
     this.classList.add('button');
   }
 }
@@ -615,9 +594,7 @@ class KeyButton extends HTMLButtonElement {
 class SpecialButton extends KeyButton {
   constructor() {
     super();
-    for (const styleProperty in SPECIAL_BUTTON_STYLE) {
-      this.style[styleProperty] = SPECIAL_BUTTON_STYLE[styleProperty];
-    }
+    Object.assign(this.style, SPECIAL_BUTTON_STYLE);
     this.classList.add('special-button');
   }
 }
@@ -626,9 +603,6 @@ class SpecialButton extends KeyButton {
 class SymbolButton extends KeyButton {
   constructor() {
     super();
-    for (const styleProperty in SYMBOL_BUTTON_STYLE) {
-      this.style[styleProperty] = SYMBOL_BUTTON_STYLE[styleProperty];
-    }
     this.classList.add('symbol-button');
   }
 }
